@@ -1,0 +1,105 @@
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Roboto:wght@400;500;700&family=Nunito:wght@500;600;700&display=swap");
+@import "tailwindcss";
+
+@theme {
+  /* Surfaces */
+  --color-bg: #0b0c10;
+  --color-surface: #14161c;
+  --color-surface-2: #1b1e27;
+  --color-border: #262a35;
+
+  /* Text */
+  --color-text-primary: #f4f5f7;
+  --color-text-secondary: #9aa0ae;
+  --color-text-muted: #656b7a;
+
+  /* Brand */
+  --color-accent: #7c5cfc;
+  --color-accent-hover: #6a47f5;
+  --color-accent-soft: #7c5cfc1a;
+
+  /* Outcome palette -- the recurring visual language of the whole product */
+  --color-outcome-blue: #3b82f6;
+  --color-outcome-pink: #ec4899;
+  --color-outcome-teal: #14b8a6;
+  --color-outcome-amber: #f59e0b;
+
+  /* Status */
+  --color-danger: #ef4444;
+  --color-warning: #f59e0b;
+  --color-success: #22c55e;
+
+  --font-display: "Montserrat", "Roboto", sans-serif;
+  --font-body: "Roboto", sans-serif;
+  --font-ui: "Nunito", sans-serif;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  background-color: var(--color-bg);
+  color: var(--color-text-primary);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+* {
+  border-color: var(--color-border);
+}
+
+::selection {
+  background: var(--color-accent);
+  color: white;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 3px;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-fade-in {
+  animation: fade-in 0.2s ease-out;
+}
+
+@keyframes bar-grow {
+  from {
+    width: 0%;
+  }
+}
+.animate-bar-grow {
+  animation: bar-grow 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}

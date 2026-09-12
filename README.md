@@ -158,6 +158,15 @@ are set, `/login` also offers **Continue with Twitch**, which runs the real
 OAuth flow (`server/src/services/twitchService.ts`) and links the streamer's
 actual Twitch identity.
 
+**A note on demo data durability:** on a free-tier host with no persistent
+disk (the default `render.yaml` config — see §8), the SQLite file is wiped
+and re-seeded on every redeploy. Anything created live in a demo session
+(an entry, a resolved prediction) does not survive that. Rather than hide
+this, the app surfaces it directly — any signed-in demo account sees a
+dismissible banner (`DemoDataBanner`) saying so. `render.yaml` documents,
+in comments, exactly what to change (plan + a mounted disk) if you want
+data to actually persist instead.
+
 ---
 
 ## 7. Database — an implementation note worth reading
@@ -273,9 +282,9 @@ Runs both suites:
   form's validation UI, `PredictionCard` across its live/resolved states,
   the login page's demo/Twitch states, and an automated accessibility pass
   (axe-core, run against jsdom) on the login page, creation form, prediction
-  card, and confirm modal. 21 tests.
+  card, confirm modal, and the demo-data banner's conditional visibility. 25 tests.
 
-45 tests total, all passing as delivered. The accessibility pass is
+49 tests total, all passing as delivered. The accessibility pass is
 structural (unlabeled controls, invalid ARIA, missing landmarks) — it
 doesn't replace a real screen-reader or contrast-rendering pass, since that
 needs an actual browser, which this build environment couldn't provision

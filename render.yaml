@@ -1,0 +1,47 @@
+# PredCon backend — Render Blueprint.
+#
+# As configured below (plan: free), this service has NO persistent disk:
+# every redeploy wipes the SQLite file and re-seeds fresh demo data. That's
+# fine for showing this off, but anything created during a live session
+# (an entry, a resolved prediction) will not survive the next `git push`.
+# The running app now surfaces this to demo users directly (see
+# DemoDataBanner in the client) rather than hiding it.
+#
+# To make data durable instead: change `plan: free` to a paid plan below
+# (Render disks require a paid instance type), then uncomment the `disks`
+# block and the alternate DATABASE_URL line right below it.
+services:
+  - type: web
+    name: predcon-api
+    runtime: node
+    rootDir: server
+    plan: free
+    buildCommand: npm install && npm run build && npm run db:migrate && npm run db:seed
+    startCommand: npm run start
+    healthCheckPath: /api/health
+    # disks:
+    #   - name: predcon-data
+    #     mountPath: /var/data
+    #     sizeGB: 1
+    envVars:
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: SUPER_ADMIN_PASSWORD
+        generateValue: true # Render generates a random one — check the dashboard after deploy and change it to something you'll remember, or leave it and copy it from there.
+      - key: DATABASE_URL
+        value: file:./dev.db
+        # value: file:/var/data/dev.db   # use this instead, once a disk is mounted above
+      - key: APP_URL
+        value: https://predcon.vercel.app
+      - key: DEMO_MODE
+        value: "true"
+      - key: NODE_ENV
+        value: production
+      - key: COOKIE_CROSS_SITE
+        value: "false"
+      - key: TWITCH_CLIENT_ID
+        value: ""
+      - key: TWITCH_CLIENT_SECRET
+        value: ""
+      - key: TWITCH_REDIRECT_URI
+        value: ""

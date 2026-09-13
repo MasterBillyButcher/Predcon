@@ -1,0 +1,118 @@
+// PredCon database schema
+// Local development uses SQLite (zero-config, file-based) so the project
+// runs immediately with `npm run db:migrate`. For production, point
+// DATABASE_URL at Postgres and change provider to "postgresql" — every
+// model below is written to be Postgres-compatible (cuid ids, indexes,
+// enums expressed as validated strings for SQLite portability).
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              String    @id @default(cuid())
+  twitchId        String?   @unique
+  username        String    @unique
+  displayName     String
+  profileImageUrl String?
+  isDemo          Boolean   @default(false)
+  role            String    @default("USER") // "USER" | "ADMIN" | "SUPER_ADMIN"
+  accessToken     String? // encrypted at rest in production; never sent to client
+  refreshToken    String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  predictions   Prediction[]            @relation("CreatedPredictions")
+  participation PredictionParticipant[]
+  sessions      Session[]
+
+  @@index([username])
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+// status is one of: DRAFT | ACTIVE | LOCKED | RESOLVING | RESOLVED | CANCELLED | EXPIRED
+model Prediction {
+  id            String    @id @default(cuid())
+  creatorId     String
+  title         String?
+  question      String
+  description   String?
+  status        String    @default("DRAFT")
+  durationSecs  Int
+  startedAt     DateTime?
+  locksAt       DateTime?
+  resolvedAt    DateTime?
+  cancelledAt   DateTime?
+  winningOutcomeId String?
+  minPoints     Int       @default(1)
+  maxPoints     Int?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  creator      User                     @relation("CreatedPredictions", fields: [creatorId], references: [id])
+  outcomes     PredictionOutcome[]
+  participants PredictionParticipant[]
+  events       PredictionEvent[]
+
+  @@index([creatorId])
+  @@index([status])
+}
+
+model PredictionOutcome {
+  id           String  @id @default(cuid())
+  predictionId String
+  label        String
+  color        String // "blue" | "pink" | "teal" | "amber" — mirrors Twitch-style outcome coloring
+  order        Int
+
+  prediction   Prediction               @relation(fields: [predictionId], references: [id], onDelete: Cascade)
+  participants PredictionParticipant[]
+
+  @@index([predictionId])
+}
+
+model PredictionParticipant {
+  id           String   @id @default(cuid())
+  predictionId String
+  outcomeId    String
+  userId       String
+  points       Int
+  createdAt    DateTime @default(now())
+
+  prediction Prediction         @relation(fields: [predictionId], references: [id], onDelete: Cascade)
+  outcome    PredictionOutcome  @relation(fields: [outcomeId], references: [id], onDelete: Cascade)
+  user       User               @relation(fields: [userId], references: [id])
+
+  @@unique([predictionId, userId]) // one entry per user per prediction
+  @@index([predictionId])
+  @@index([outcomeId])
+}
+
+// type is one of the prediction.* / countdown.* / leaderboard.* event names
+model PredictionEvent {
+  id           String   @id @default(cuid())
+  predictionId String
+  type         String
+  payload      String // JSON-encoded event payload
+  createdAt    DateTime @default(now())
+
+  prediction Prediction @relation(fields: [predictionId], references: [id], onDelete: Cascade)
+
+  @@index([predictionId])
+  @@index([type])
+}

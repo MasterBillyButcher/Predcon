@@ -1,9 +1,0 @@
-{
-  "short_name": "PredCon",
-  "name": "PredCon — Interactive Predictions",
-  "icons": [{ "src": "favicon.svg", "type": "image/svg+xml", "sizes": "any" }],
-  "start_url": "/",
-  "display": "standalone",
-  "theme_color": "#0B0C10",
-  "background_color": "#0B0C10"
-}
